@@ -1,0 +1,284 @@
+Question 1
+
+IProductSales.java (file name)
+
+public interface IProduct {
+    int GetTotalProductsSold();
+    double GetAverageProductSold();
+    String GetMostPopularProduct();
+}
+****************************************************************************************************************************************************************
+Product.java (file name)
+
+public class Product implements IProduct {
+    // 1D array for product names
+    private String[] products;
+    // 2D array for sales showing product and month
+    private int[][] sales;
+
+    public Product(String[] products, int[][] sales) {
+        this.products = products;
+        this.sales = sales;
+    }
+
+    @Override
+    public int GetTotalProductsSold() {
+        int total = 0;
+        for (int i = 0; i < sales.length; i++) {
+            for (int j = 0; j < sales[i].length; j++) {
+                total = total + sales[i][j];
+            }
+        }
+        return total;
+    }
+
+    @Override
+    public double GetAverageProductSold() {
+        int total = GetTotalProductsSold();
+        int count = sales.length * sales[0].length;
+        return (double) total / count;
+    }
+
+    @Override
+    public String GetMostPopularProduct() {
+        int highest = -1;
+        int index = 0;
+        for (int i = 0; i < sales.length; i++) {
+            int prodTotal = 0;
+            for (int j = 0; j < sales[i].length; j++) {
+                prodTotal = prodTotal + sales[i][j];
+            }
+            if (prodTotal > highest) {
+                highest = prodTotal;
+                index = i;
+            }
+        }
+        return products[index] + "(" + highest + ")";
+    }
+}
+****************************************************************************************************************************************************************
+PrintProduct.java (file name)
+
+public class PrintProduct {
+    private Product product;
+
+    public PrintProduct(Product product) {
+        this.product = product;
+    }
+
+    public void PrintTotalProductSales() {
+        System.out.println("TOTAL PRODUCT SALES: " + product.GetTotalProductsSold());
+    }
+
+    public void PrintAverageProductSales() {
+        // Displaying Average
+        System.out.println("AVERAGE PRODUCT SALES: " + (int) product.GetAverageProductSold());
+    }
+
+    public void PrintMostPopularProduct() {
+        System.out.println("MOST POPULAR PRODUCT: " + product.GetMostPopularProduct());
+    }
+
+    public void PrintReport() {
+        System.out.println("\nPRODUCT SALES REPORT - 2026");
+        System.out.println("********************************************");
+        PrintTotalProductSales();
+        PrintAverageProductSales();
+        PrintMostPopularProduct();
+    }
+}
+******************************************************************************************************************************************************************
+Main.java (file name)
+
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String[] products = {"Cozy Nights Monarch", "Restonic Barbados", "Sealy Phuket"};
+        int[][] sales = new int[3][3];
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                System.out.print("Enter number of sales for month " + (j + 1) + " for " + products[i] + " mattress: ");
+                sales[i][j] = sc.nextInt();
+            }
+            System.out.println();
+        }
+
+        Product p = new Product(products, sales);
+        PrintProduct printer = new PrintProduct(p);
+        printer.PrintReport();
+    }
+}
+*****************************************************************************************************************************************************************
+Unit Test 
+
+import GetTotalProductsSold.Product;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ProductTest {
+
+    @Test
+    public void GetTotalProductSales_WithValidData_ReturnsCorrectValue() {
+        String[] products = {"Cozy Nights Monarch", "Restonic Barbados", "Sealy Phuket"};
+        int[][] sales = {{25, 18, 20}, {15, 10, 12}, {18, 15, 20}};
+        Product p = new Product(products, sales);
+        assertEquals(153, p.GetTotalProductsSold());
+    }
+
+    @Test
+    public void GetAverageSales_WithValidData_ReturnsCorrectValue() {
+        String[] products = {"Cozy Nights Monarch", "Restonic Barbados", "Sealy Phuket"};
+        int[][] sales = {{25, 18, 20}, {15, 10, 12}, {18, 15, 20}};
+        Product p = new Product(products, sales);
+        assertEquals(17.0, p.GetAverageProductSold(), 0.01);
+    }
+}
+*****************************************************************************************************************************************************************
+
+Question 2
+
+public interface IProductCalculations {
+    double GetVat(double price);
+    double GetCommission(double price);
+    double GetTotal(double price);
+}
+******************************************************************************************************************************************************************
+public class ProductCalculations implements IProductCalculations {
+
+    @Override
+    public double GetVat(double price) {
+        return price * 0.15;
+    }
+
+    @Override
+    public double GetCommission(double price) {
+        return price * 0.05;
+    }
+
+    @Override
+    public double GetTotal(double price) {
+        return price + GetVat(price) + GetCommission(price);
+    }
+}
+*****************************************************************************************************************************************************************
+import java.io.FileWriter;
+import javax.swing.*;
+import java.awt.*;
+
+public class Main extends JFrame {
+    private JTextField txtName, txtPrice;
+    private JComboBox<String> cmbProduct;
+    private JButton btnProcess, btnClear;
+
+    public Main() {
+        setTitle("Mattress Sales");
+        setSize(400, 300);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new GridLayout(5, 2, 10, 10));
+
+        // Displaying menu
+        JMenuBar bar = new JMenuBar();
+        JMenu file = new JMenu("File");
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(e -> System.exit(0));
+        file.add(exit);
+
+        JMenu tools = new JMenu("Tools");
+        JMenuItem processMenu = new JMenuItem("Process");
+        processMenu.addActionListener(e -> processSale());
+        JMenuItem clearMenu = new JMenuItem("Clear");
+        clearMenu.addActionListener(e -> clearFields());
+        tools.add(processMenu);
+        tools.add(clearMenu);
+
+        bar.add(file);
+        bar.add(tools);
+        setJMenuBar(bar);
+
+        add(new JLabel("Customer Name:"));
+        txtName = new JTextField();
+        add(txtName);
+
+        add(new JLabel("Product Name:"));
+        cmbProduct = new JComboBox<>(new String[]{"Cozy Nights Monarch", "Restonic Barbados", "Sealy Phuket"});
+        add(cmbProduct);
+
+        add(new JLabel("Product Price:"));
+        txtPrice = new JTextField();
+        add(txtPrice);
+
+        btnProcess = new JButton("Process");
+        btnProcess.addActionListener(e -> processSale());
+        add(btnProcess);
+
+        btnClear = new JButton("Clear");
+        btnClear.addActionListener(e -> clearFields());
+        add(btnClear);
+    }
+
+    private void processSale() {
+        try {
+            String name = txtName.getText();
+            String product = (String) cmbProduct.getSelectedItem();
+            double price = Double.parseDouble(txtPrice.getText());
+
+            ProductCalculations calc = new ProductCalculations();
+            double vat = calc.GetVat(price);
+            double comm = calc.GetCommission(price);
+            double total = calc.GetTotal(price);
+
+            // Creating Message
+            String msg = "Customer Name: " + name + "\nProduct: " + product
+                    + "\nVAT: R " + vat + "\nCOMMISSION: R " + comm + "\nTOTAL: R " + total;
+            JOptionPane.showMessageDialog(this, msg, "Message", JOptionPane.INFORMATION_MESSAGE);
+
+            // Saving to the data.txt thingy
+            FileWriter w = new FileWriter("data.txt");
+            w.write("DATA LOG\n");
+            w.write("********************************************\n");
+            w.write("Customer Name: " + name + "\n");
+            w.write("Product: " + product + "\n");
+            w.write("VAT: R " + vat + "\n");
+            w.write("COMMISSION: R " + comm + "\n");
+            w.write("TOTAL: R " + total + "\n");
+            w.write("********************************************\n");
+            w.close();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Please enter valid name and price");
+        }
+    }
+
+    private void clearFields() {
+        txtName.setText("");
+        txtPrice.setText("");
+        cmbProduct.setSelectedIndex(0);
+    }
+
+    public static void main(String[] args) {
+        new Main().setVisible(true);
+    }
+}
+*******************************************************************************************************************************************************************
+import GetVat.ProductCalculations;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class ProductCalculationsTest {
+
+    @Test
+    public void GetVat_WithValidData_ReturnsCorrectValue() {
+        ProductCalculations c = new ProductCalculations();
+        assertEquals(525.0, c.GetVat(3500), 0.01);
+    }
+
+    @Test
+    public void GetTotal_WithValidData_ReturnsCorrectValue() {
+        ProductCalculations c = new ProductCalculations();
+        assertEquals(4200.0, c.GetTotal(3500), 0.01);
+    }
+}
+*************************************************************************************************************************************************************************
